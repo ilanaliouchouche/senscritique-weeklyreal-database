@@ -115,6 +115,57 @@ class BaseFilmExtractor:
         if span_image and 'data-srcname' in span_image.attrs:
             data_srcname = span_image.attrs['data-srcname']
         return data_srcname
+
+    @staticmethod
+    def extract_reviews(url, is_negative=True, cpt = 4):
+        if cpt == 0:
+            raise Exception("Too many attempts")
+        
+        driver = webdriver.Chrome()
+
+        n = BaseFilmExtractor.calculate_total_pages(url)
+
+        review_url = f"{url}/critiques"
+        driver.get(review_url)
+
+        time.sleep(5)
+        try:
+            cookie_button = driver.find_element(By.ID, "didomi-notice-agree-button")
+            cookie_button.click()
+            time.sleep(5)
+        except Exception as e:
+            raise Exception("Cookie button not found or already clicked")
+
+        review_type = 'Négatives' if is_negative else 'Positives'
+        link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")
+        link_reviews.click()
+
+        all_links = []
+        page_number = 1
+
+        while True:
+            time.sleep(5)
+
+            elements = driver.find_elements(By.XPATH, "//a[contains(@class, 'Text__SCText-sc-1aoldkr-0') and contains(@class, 'Link__PrimaryLink-sc-1v081j9-0') and contains(@class, 'gATBvI') and contains(@class, 'hJEAZk') and contains(@class, 'link')]")
+            links = [element.get_attribute('href') for element in elements]
+            all_links.extend(links)
+
+            try:
+                page_number += 1
+                next_page_button = driver.find_element(By.XPATH, f"//nav[contains(@class, 'Pagination__WrapperPagination-sc-1h0mvsr-0') and contains(@class, 'dFTVxz')]//span[normalize-space()='{page_number}']")
+                next_page_button.click()
+            except Exception as e:
+                if page_number != n:
+                    c = cpt - 1
+                    driver.quit()
+                    BaseFilmExtractor.extract_reviews(url, is_negative, cpt=c)
+                else:
+                    print(f"Done with page {page_number - 1} for {url}")
+                    break
+
+        driver.quit()
+
+        return all_links
     
     def extract_all_film_data(self):
         all_details = {}
@@ -126,6 +177,7 @@ class BaseFilmExtractor:
             all_details[title]['url'] = url
             all_details[title]['rate'] = self.extract_film_rating(url)
             all_details[title]['image'] = self.extract_image(url)
+            all_details[title]['reviews'] = {'Positives' : self.extract_reviews(url, is_negative=False), 'Negatives' : self.extract_reviews(url, is_negative=True)}
         self.informations = all_details
 
 
