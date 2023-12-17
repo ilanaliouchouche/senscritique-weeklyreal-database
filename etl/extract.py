@@ -40,7 +40,7 @@ class BaseFilmExtractor:
         driver.get(self.url)
 
         time.sleep(5)
-        cookie_button = self.driver.find_element(By.ID, "didomi-notice-agree-button")
+        cookie_button = driver.find_element(By.ID, "didomi-notice-agree-button")
         cookie_button.click()
         time.sleep(5)
 
@@ -57,7 +57,7 @@ class BaseFilmExtractor:
                 next_page_button.click()
                 time.sleep(5)
             except Exception as e:
-                if page_number != n:
+                if page_number - 1 != n:
                     c = cpt - 1
                     driver.quit()
                     self.extract_all_film_links(cpt=c)
@@ -124,6 +124,7 @@ class BaseFilmExtractor:
         driver = webdriver.Chrome()
 
         n = BaseFilmExtractor.calculate_total_pages(url)
+        print(n)
 
         review_url = f"{url}/critiques"
         driver.get(review_url)
@@ -155,17 +156,46 @@ class BaseFilmExtractor:
                 next_page_button = driver.find_element(By.XPATH, f"//nav[contains(@class, 'Pagination__WrapperPagination-sc-1h0mvsr-0') and contains(@class, 'dFTVxz')]//span[normalize-space()='{page_number}']")
                 next_page_button.click()
             except Exception as e:
-                if page_number != n:
+                if (page_number - 1) != n:
                     c = cpt - 1
                     driver.quit()
                     BaseFilmExtractor.extract_reviews(url, is_negative, cpt=c)
                 else:
                     print(f"Done with page {page_number - 1} for {url}")
+                    driver.quit()
                     break
 
-        driver.quit()
 
         return all_links
+    
+    @staticmethod
+    def extract_review_details(url):
+
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        review_content = soup.find("div", class_="Content__Container-sc-kh4s73-0 eCjAM")
+        content = review_content.find("p").text if review_content else "Content not found"
+
+        review_title = soup.find("h1", class_="Text__SCUserText-sc-1aoldkr-2 ReviewTitle__SCTitleStyle-sc-15v21rr-0 kRkjza cjQHgA Review__StyledReviewTitle-sc-197w87t-7 elSTZr")
+        title = review_title.text if review_title else "Title not found"
+
+        ctas = soup.find_all("div", class_="CTARoundTotal__Container-sc-abr50j-0 cbKjVp")
+        likes, comments = None, None
+        if ctas:
+            spans = [cta.find("span", class_="Text__SCTitle-sc-1aoldkr-1 CTARoundTotal__Label-sc-abr50j-1 glKUks kqxwbN") for cta in ctas]
+            if len(spans) >= 2:
+                likes = spans[0].text if spans[0] else 0
+                comments = spans[1].text if spans[1] else 0
+
+        return {
+            "title": title,
+            "likes": likes,
+            "comments": comments,
+            "content": content,
+            "url": url
+        }
+        
     
     def extract_all_film_data(self):
         all_details = {}
@@ -178,10 +208,19 @@ class BaseFilmExtractor:
             all_details[title]['rate'] = self.extract_film_rating(url)
             all_details[title]['image'] = self.extract_image(url)
             all_details[title]['reviews'] = {'Positives' : self.extract_reviews(url, is_negative=False), 'Negatives' : self.extract_reviews(url, is_negative=True)}
+        for title, details in tqdm(all_details.items()):
+            for review_type, review_links in details['reviews'].items():
+                reviews = []
+                for link in review_links:
+                    reviews.append(self.extract_review_details(link))
+                details['reviews'][review_type] = reviews
         self.informations = all_details
 
 
-class Extract(BaseFilmExtractor):
+class CurrentMovieExtractor(BaseFilmExtractor):
 
-    def __init__(self, url):
+    URL  = "https://www.senscritique.com/films/cette-semaine"
+
+    def __init__(self, url=URL):
         super().__init__(url)
+        self.url = url
