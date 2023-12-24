@@ -6,6 +6,10 @@ from selenium.webdriver.common.by import By
 import time
 import pandas as pd
 import re
+import json
+from datetime import datetime
+from copy import deepcopy
+import psycopg2
 
 class BaseFilmExtractor:
     
@@ -35,6 +39,7 @@ class BaseFilmExtractor:
             return 1 
 
     def extract_all_film_links(self, cpt = 4):
+        print("Extracting all films links...")
         if cpt == 0:
             raise Exception("Too many attempts")
         n = self.calculate_total_pages(self.url)
@@ -68,12 +73,13 @@ class BaseFilmExtractor:
                     print(f"Done with page {page_number - 1}")
                     driver.quit()
                     break
+        print("Done with all films links")
     
     @staticmethod
     def extract_film_details(detail_url):
         response = requests.get(detail_url)
         soup = BeautifulSoup(response.content, 'html.parser')
-        info_div = soup.find("div", class_="Text__SCText-sc-1aoldkr-0 Movie__Text-sc-1tik1a1-1 gATBvI kkLsHK")
+        info_div = soup.find("div", class_="sc-e6f263fc-0 sc-fa5905bc-1 iZcnfH egYIEb")
         infos = []
         if info_div:
             for span in info_div.find_all("span"):
@@ -109,10 +115,12 @@ class BaseFilmExtractor:
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        png_links = soup.find_all('link', attrs={'as': 'image', 'href': True})
-        png_urls = [link['href'] for link in png_links if link['href'].endswith('.png')]
-
-        return png_urls[0] 
+        png_link = soup.find_all('script', attrs={'type': 'application/ld+json'})
+        if png_link:
+            json_data = json.loads(png_link[0].string)
+            image_url = json_data['image']
+            return image_url
+        return None
 
     @classmethod
     def extract_reviews(cls, url, is_negative=True, cpt = 100):
@@ -201,6 +209,7 @@ class BaseFilmExtractor:
     
     def extract_all_film_data(self):
         all_details = {}
+        print("Extracting all films informations...")
         for url in tqdm(self.urls_films):
             detail_url = url + "/details"
             details = self.extract_film_details(detail_url)
@@ -210,6 +219,7 @@ class BaseFilmExtractor:
             all_details[title]['rate'] = self.extract_film_rating(url)
             all_details[title]['image'] = self.extract_image(url)
             all_details[title]['reviews'] = {'Positives' : self.extract_reviews(url, is_negative=False), 'Negatives' : self.extract_reviews(url, is_negative=True)}
+        print("Done with all films, extracting reviews...")
         for title, details in tqdm(all_details.items()):
             for review_type, review_links in details['reviews'].items():
                 reviews = []
@@ -228,6 +238,7 @@ class CurrentMovieExtractor(BaseFilmExtractor):
         self.url = url
     
     def extract_all_film_links(self):
+        print("Extracting all films links...")
         response = requests.get(self.url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -235,12 +246,10 @@ class CurrentMovieExtractor(BaseFilmExtractor):
 
         base_url = "https://www.senscritique.com/"
         self.urls_films = [base_url + link.get('href') for link in links if link.get('href')]
+        print("Done with all films links")
     
     @classmethod
-    def extract_reviews(cls, url, is_negative=True, cpt = 100):
-        if cpt == 0:
-            raise Exception("Too many attempts")
-        
+    def extract_reviews(cls, url, is_negative=True):
         driver = webdriver.Chrome()
 
         review_url = f"{url}/critiques"
@@ -278,8 +287,28 @@ class FilmTransformer:
         self.extractor = extractor
         self.df_films, self.df_genres, self.df_producteurs, self.df_realisateurs, self.df_scenaristes, self.df_pays, self.df_reviews = self.__transform()
     
+    @staticmethod
+    def get_embeddings(reviews):
+        embeddings = []
+        print("Computing embeddings...")
+
+        for r in tqdm(reviews):
+            response = requests.post("http://0.0.0.0:8088/embed", json={
+            "inputs": r,
+            "normalize": True,
+            "truncate": False
+            })
+            if response.status_code == 200:
+                embeddings.extend(response.json())
+            else:
+                embeddings.append(None)
+        print("Done with embeddings")
+
+        return embeddings
+
+    
     def __transform(self):
-        informations = self.extractor.informations
+        informations = deepcopy(self.extractor.informations)
         films_cols  = ['url', 'rate', 'Date de sortie (France)', 'image', 'Bande originale', 'Groupe', 'Année', 'Durée']
         df_films = pd.DataFrame(columns=['film',*films_cols])
         df_genres = pd.DataFrame(columns=['film', 'genre'])
@@ -302,6 +331,24 @@ class FilmTransformer:
                 elif re.match(r"^Pays d.*", key):
                     info['Pays d\'origine'] = info.pop(key)
 
+            groups = re.match(r'(\d+)\s*h(\s*(\d+)\s*min)?', info.get('Durée', ''))
+
+            if groups:
+                heures = groups.group(1)
+                minutes = groups.group(3) if groups.group(3) else 0
+                info['Durée'] = int(heures) * 60 + int(minutes) 
+            else:
+                info['Durée'] = None
+
+            mois_fr_to_num = {
+                "janvier": "01", "février": "02", "mars": "03",
+                "avril": "04", "mai": "05", "juin": "06",
+                "juillet": "07", "août": "08", "septembre": "09",
+                "octobre": "10", "novembre": "11", "décembre": "12"
+            }
+            for mois_fr, mois_num in mois_fr_to_num.items():
+                info['Date de sortie (France)'] = re.sub(mois_fr, mois_num, info.get('Date de sortie (France)', ''))
+            info['Date de sortie (France)'] = datetime.strptime(info['Date de sortie (France)'], '%d %m %Y').strftime('%Y-%m-%d')
             film_dict = dict(**{'film' : title}, **{key: info.get(key, None) for key in films_cols})
         
 
@@ -327,7 +374,74 @@ class FilmTransformer:
                 df_genres = df_genres._append({'film': title, 'genre': genre}, ignore_index=True)
 
 
-
+        df_reviews['embedding'] = self.get_embeddings(df_reviews['content'].tolist())
+        df_films['Durée'] = pd.to_numeric(df_films['Durée'], errors='coerce', downcast='integer')
+        df_films['Année'] = pd.to_numeric(df_films['Année'], errors='coerce', downcast='integer')
+        df_reviews['likes'] = pd.to_numeric(df_reviews['likes'], errors='coerce', downcast='integer')
+        df_reviews['comments'] = pd.to_numeric(df_reviews['comments'], errors='coerce', downcast='integer')
         return df_films, df_genres, df_producteurs, df_realisateurs, df_scenaristes, df_pays, df_reviews
+
+class FilmLoader:
+
+    def __init__(self, data : FilmTransformer, dbname, user, password, host, port):
+        self.data = data
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
+        try:
+            self.conx = psycopg2.connect(self())
+            self.conx.autocommit = True
+        except:
+            raise Exception("Connection failed")
+    
+    def __load(self, df, table_name):
+        with self.conx.cursor() as cursor:
+            for i, row in df.iterrows():
+                columns = []
+                placeholders = []
+                values = []
+                for col, val in zip(df.columns, row.values):
+                    if col == 'Date de sortie (France)':
+                        col = 'date_sortie'
+                    elif col == 'Durée':
+                        col = 'duree'
+                    elif col == 'Année':
+                        col = 'annee'
+                    elif col == 'Bande originale':
+                        col = 'bande_originale'
+                    elif col == 'Groupe':
+                        col = 'groupe'
+                    
+                    columns.append(col)
+                    placeholders.append("%s")
+                    values.append(val)
+
+                query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
+                print(query, values)
+                cursor.execute(query, values)
+    
+    def loading(self):
+        print("Loading data...")
+        self.__load(self.data.df_films, 'films')
+        self.__load(self.data.df_genres, 'genres')
+        self.__load(self.data.df_producteurs, 'producteurs')
+        self.__load(self.data.df_realisateurs, 'realisateurs')
+        self.__load(self.data.df_scenaristes, 'scenaristes')
+        self.__load(self.data.df_pays, 'pays')
+        self.__load(self.data.df_reviews, 'reviews')
+        print("Done with loading")
+    
+    def __str__(self):
+        return f"dbname={self.dbname} user={self.user} password={self.password} host={self.host} port={self.port}"
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    def __call__(self):
+        return self.__str__()
         
+        
+
         
