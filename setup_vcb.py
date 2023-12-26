@@ -40,5 +40,11 @@ class SetupPGVector:
         return self.__str__()
     
     def __call__(self):
-        return self.__str__()   
+        return self.__str__()  
+
+
+if __name__ == "__main__":
+    setup = SetupPGVector(dbname="postgres", user="postgres", password="postgres", host="localhost", port=5432)
+    setup.setup_vdb()
+
         
