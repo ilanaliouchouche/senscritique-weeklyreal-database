@@ -24,13 +24,13 @@ class SetupPGVector:
             cursor.execute(f"DROP TABLE IF EXISTS scenaristes")
             cursor.execute(f"DROP TABLE IF EXISTS pays")
             cursor.execute(f"DROP TABLE IF EXISTS reviews")
-            cursor.execute(f"CREATE TABLE films (id SERIAL PRIMARY KEY, film VARCHAR(255), url VARCHAR(255), rate FLOAT, date_sortie DATE, image VARCHAR(255), bande_originale VARCHAR(255), groupe VARCHAR(255), annee INT, duree INT)")
+            cursor.execute(f"CREATE TABLE films (id SERIAL PRIMARY KEY, film VARCHAR(255), url VARCHAR(255), rate FLOAT, date_sortie DATE, image VARCHAR(255), bande_originale VARCHAR(255), groupe VARCHAR(255), annee FLOAT, duree FLOAT)")
             cursor.execute(f"CREATE TABLE genres (id SERIAL PRIMARY KEY, film VARCHAR(255), genre VARCHAR(255))")
             cursor.execute(f"CREATE TABLE producteurs (id SERIAL PRIMARY KEY, film VARCHAR(255), producteur VARCHAR(255))")
             cursor.execute(f"CREATE TABLE realisateurs (id SERIAL PRIMARY KEY, film VARCHAR(255), realisateur VARCHAR(255))")
             cursor.execute(f"CREATE TABLE scenaristes (id SERIAL PRIMARY KEY, film VARCHAR(255), scenariste VARCHAR(255))")
             cursor.execute(f"CREATE TABLE pays (id SERIAL PRIMARY KEY, film VARCHAR(255), pays VARCHAR(255))")
-            cursor.execute(f"CREATE TABLE reviews (id SERIAL PRIMARY KEY, film VARCHAR(255), is_negative BOOLEAN, title VARCHAR(255), likes INT, comments INT, content TEXT, url VARCHAR(255), embedding vector({vector_size}))")
+            cursor.execute(f"CREATE TABLE reviews (id SERIAL PRIMARY KEY, film VARCHAR(255), is_negative BOOLEAN, title VARCHAR(255), likes FLOAT, comments FLOAT, content TEXT, url VARCHAR(255), embedding vector({vector_size}))")
         
     
     def __str__(self):

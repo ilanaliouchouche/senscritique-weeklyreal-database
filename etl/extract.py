@@ -383,7 +383,7 @@ class FilmTransformer:
 
 class FilmLoader:
 
-    def __init__(self, data : FilmTransformer, dbname, user, password, host, port):
+    def __init__(self, data : FilmTransformer, dbname : str, user : str, password : str, host : str, port : int):
         self.data = data
         self.dbname = dbname
         self.user = user
@@ -398,7 +398,7 @@ class FilmLoader:
     
     def __load(self, df, table_name):
         with self.conx.cursor() as cursor:
-            for i, row in df.iterrows():
+            for _, row in df.iterrows():
                 columns = []
                 placeholders = []
                 values = []
@@ -419,7 +419,6 @@ class FilmLoader:
                     values.append(val)
 
                 query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
-                print(query, values)
                 cursor.execute(query, values)
     
     def loading(self):
