@@ -1,8 +1,16 @@
 import psycopg2
+import os
 
 class SetupPGVector:
+    ''' Setup database with vector extension '''
 
     def __init__(self, dbname, user, password, host, port):
+        ''' Constructor for SetupPGVector:
+            - dbname : database name
+            - user : user name
+            - password : password
+            - host : host name
+            - port : port number '''
         self.dbname = dbname
         self.user = user
         self.password = password
@@ -15,6 +23,7 @@ class SetupPGVector:
             raise Exception("Connection failed")
     
     def setup_vdb(self, vector_size = 1024):
+        ''' Setup database with vector extension '''
         with self.conx.cursor() as cursor:
             cursor.execute(f"CREATE EXTENSION IF NOT EXISTS vector")
             cursor.execute(f"DROP TABLE IF EXISTS films")
@@ -34,17 +43,20 @@ class SetupPGVector:
         
     
     def __str__(self):
+        ''' String representation of SetupPGVector '''
         return f"dbname={self.dbname} user={self.user} password={self.password} host={self.host} port={self.port}"
     
     def __repr__(self):
+        ''' Representation of SetupPGVector '''
         return self.__str__()
     
     def __call__(self):
+        ''' Call SetupPGVector '''
         return self.__str__()  
 
 
 if __name__ == "__main__":
-    setup = SetupPGVector(dbname="postgres", user="postgres", password="postgres", host="localhost", port=5432)
+    setup = SetupPGVector(dbname=os.getenv("PG_DBNAME"), user=os.getenv("PG_USER"), password=os.getenv("PG_DBPASSWORD"), host=os.getenv("PG_HOSTNAME"), port=os.getenv("PG_HPORT"))
     setup.setup_vdb()
 
         

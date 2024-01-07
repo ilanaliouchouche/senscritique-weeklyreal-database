@@ -3,25 +3,32 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 import time
 import json
 
 class BaseFilmExtractor:
+    ''' Base class for film extractor, it contains all the methods to extract films informations from senscritique.com in a given year. '''
     
     URL = "https://www.senscritique.com/films/sorties-cinema/"
 
     def __init__(self, year, url=URL):
+        ''' Constructor for BaseFilmExtractor :
+            - year : year of the films
+            - url : url of the page to extract films from (default : https://www.senscritique.com/films/sorties-cinema/)) '''
         self.url = f"{url}/{year}"
         self.urls_films = None
         self.informations = None
     
     @staticmethod
     def extract_film_links_from_page(driver):
+        ''' Extract all film links from a given page '''
         elements = driver.find_elements(By.CLASS_NAME, "Poster__SubLink-sc-yale2-2.jhmgpI")
         return [element.get_attribute('href') for element in elements]
 
     @staticmethod
     def calculate_total_pages(url):
+        ''' Calculate the total number of pages for a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -34,6 +41,7 @@ class BaseFilmExtractor:
             return 1 
 
     def extract_all_film_links(self, cpt = 4):
+        ''' Extract all film links from a given url '''
         print("Extracting all films links...")
         if cpt == 0:
             raise Exception("Too many attempts")
@@ -72,6 +80,7 @@ class BaseFilmExtractor:
     
     @staticmethod
     def extract_film_details(detail_url):
+        ''' Extract all film details from a given url '''
         response = requests.get(detail_url)
         soup = BeautifulSoup(response.content, 'html.parser')
         info_div = soup.find("div", class_="sc-e6f263fc-0 sc-fa5905bc-1 iZcnfH egYIEb")
@@ -86,6 +95,7 @@ class BaseFilmExtractor:
 
     @staticmethod
     def extract_film_title(detail_url):
+        ''' Extract film title from a given url '''
         response = requests.get(detail_url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -97,6 +107,7 @@ class BaseFilmExtractor:
     
     @staticmethod
     def extract_film_rating(url):
+        ''' Extract film rating from a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -107,6 +118,7 @@ class BaseFilmExtractor:
     
     @staticmethod
     def extract_image(url):
+        ''' Extract film image from a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -119,22 +131,17 @@ class BaseFilmExtractor:
 
     @classmethod
     def extract_reviews(cls, url, is_negative=True, cpt = 100):
+        ''' Extract all film reviews from a given url '''
         if cpt == 0:
             raise Exception("Too many attempts")
         
-        driver = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless=new")
+        driver = webdriver.Chrome(options=chrome_options)
 
         review_url = f"{url}/critiques"
 
         driver.get(review_url)
-
-        time.sleep(7)
-        try:
-            cookie_button = driver.find_element(By.ID, "didomi-notice-agree-button")
-            cookie_button.click()
-            time.sleep(5)
-        except Exception as e:
-            raise Exception("Cookie button not found or already clicked")
 
         review_type = 'Négatives' if is_negative else 'Positives'
         link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")
@@ -175,7 +182,7 @@ class BaseFilmExtractor:
     
     @staticmethod
     def extract_review_details(url):
-
+        ''' Extract review details from a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -203,6 +210,7 @@ class BaseFilmExtractor:
         
     
     def extract_all_film_data(self):
+        ''' Extract all film data from a given url using all the methods above'''
         all_details = {}
         print("Extracting all films informations...")
         for url in tqdm(self.urls_films):
@@ -221,18 +229,24 @@ class BaseFilmExtractor:
                 for link in review_links:
                     reviews.append(self.extract_review_details(link))
                 details['reviews'][review_type] = reviews
+        print("Done with all reviews")
         self.informations = all_details
 
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class CurrentMovieExtractor(BaseFilmExtractor):
 
+    ''' Class to extract films informations from senscritique.com in the current week. '''
     URL  = "https://www.senscritique.com/films/cette-semaine"
 
     def __init__(self, url=URL):
+        ''' Constructor for CurrentMovieExtractor :
+            - url : url of the page to extract films from (default : https://www.senscritique.com/films/cette-semaine)) '''
         super().__init__(url)
         self.url = url
     
     def extract_all_film_links(self):
+        ''' Extract all film links from a given url '''
         print("Extracting all films links...")
         response = requests.get(self.url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -245,19 +259,14 @@ class CurrentMovieExtractor(BaseFilmExtractor):
     
     @classmethod
     def extract_reviews(cls, url, is_negative=True):
-        driver = webdriver.Chrome()
+        ''' Extract all film reviews from a given url '''
+        chrome_options = Options()
+        chrome_options.add_argument("--headless=new")
+        driver = webdriver.Chrome(options=chrome_options)
 
         review_url = f"{url}/critiques"
 
         driver.get(review_url)
-
-        time.sleep(7)
-        try:
-            cookie_button = driver.find_element(By.ID, "didomi-notice-agree-button")
-            cookie_button.click()
-            time.sleep(5)
-        except Exception as e:
-            raise Exception("Cookie button not found or already clicked")
 
         review_type = 'Négatives' if is_negative else 'Positives'
         link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")

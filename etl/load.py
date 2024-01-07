@@ -2,8 +2,16 @@ from etl.transform import FilmTransformer
 import psycopg2
 
 class FilmLoader:
+    ''' Load data into database '''
 
     def __init__(self, data : FilmTransformer, dbname : str, user : str, password : str, host : str, port : int):
+        ''' FilmLoader constructor:
+            - data : FilmTransformer object
+            - dbname : database name
+            - user : user name
+            - password : password
+            - host : host name
+            - port : port number '''
         self.data = data
         self.dbname = dbname
         self.user = user
@@ -11,12 +19,17 @@ class FilmLoader:
         self.host = host
         self.port = port
         try:
+            print(f"Connecting to database: {self.__str__()}")
             self.conx = psycopg2.connect(self())
             self.conx.autocommit = True
         except:
             raise Exception("Connection failed")
+        print("Connected to database")
     
     def __load(self, df, table_name):
+        ''' Load data from a dataframe into database:
+            - df : dataframe
+            - table_name : table name '''
         with self.conx.cursor() as cursor:
             for _, row in df.iterrows():
                 columns = []
@@ -42,6 +55,7 @@ class FilmLoader:
                 cursor.execute(query, values)
     
     def loading(self):
+        ''' Load all data into database '''
         print("Loading data...")
         self.__load(self.data.df_films, 'films')
         self.__load(self.data.df_genres, 'genres')
@@ -53,10 +67,13 @@ class FilmLoader:
         print("Done with loading")
     
     def __str__(self):
+        ''' String representation of FilmLoader object '''
         return f"dbname={self.dbname} user={self.user} password={self.password} host={self.host} port={self.port}"
     
     def __repr__(self):
+        ''' Representation of FilmLoader object '''
         return self.__str__()
     
     def __call__(self):
+        ''' Call FilmLoader object '''
         return self.__str__()
