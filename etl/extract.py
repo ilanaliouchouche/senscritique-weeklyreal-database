@@ -6,6 +6,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
 import json
+from dotenv import load_dotenv
+import os
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 class BaseFilmExtractor:
     ''' Base class for film extractor, it contains all the methods to extract films informations from senscritique.com in a given year. '''
@@ -137,7 +140,7 @@ class BaseFilmExtractor:
         
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Remote(f"http://{os.getenv('SEL_HOSTNAME')}:{os.getenv('SEL_HPORT')}/wd/hub", options=chrome_options)
 
         review_url = f"{url}/critiques"
 
@@ -222,6 +225,7 @@ class BaseFilmExtractor:
             all_details[title]['rate'] = self.extract_film_rating(url)
             all_details[title]['image'] = self.extract_image(url)
             all_details[title]['reviews'] = {'Positives' : self.extract_reviews(url, is_negative=False), 'Negatives' : self.extract_reviews(url, is_negative=True)}
+        print(all_details)
         print("Done with all films, extracting reviews...")
         for title, details in tqdm(all_details.items()):
             for review_type, review_links in details['reviews'].items():
@@ -251,7 +255,7 @@ class CurrentMovieExtractor(BaseFilmExtractor):
         response = requests.get(self.url)
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        links = soup.find_all('a', class_='sc-e976169f-2 juEctl')
+        links = soup.find_all('a', class_='sc-e6f263fc-0 sc-a0949da7-1 cTitej eGjRhz sc-4495ecbb-3 hCRsTs')
 
         base_url = "https://www.senscritique.com/"
         self.urls_films = [base_url + link.get('href') for link in links if link.get('href')]
@@ -262,7 +266,7 @@ class CurrentMovieExtractor(BaseFilmExtractor):
         ''' Extract all film reviews from a given url '''
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Remote(f"http://{os.getenv('SEL_HOSTNAME')}:{os.getenv('SEL_HPORT')}/wd/hub", options=chrome_options)
 
         review_url = f"{url}/critiques"
 

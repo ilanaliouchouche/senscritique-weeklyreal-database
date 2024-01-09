@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    depends_on:
+      - pgvdb
+      - tei
+      - selenium
+    networks:
+      - default
+
+  pgvdb:
+    image: ankane/pgvector
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dw2
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+
+  tei:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-0.6
+    environment:
+      - PULL=always
+      - MODEL_ID=intfloat/multilingual-e5-large
+      - REVISION=refs/pr/5
+    ports:
+      - "8088:80"
+    volumes:
+      - ./llm_data:/data
+
+  selenium:
+    image: selenium/standalone-chrome
+    ports:
+      - "4444:4444"
+
+networks:
+  default:

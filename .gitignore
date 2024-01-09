@@ -3,3 +3,5 @@
 /current_film_links.txt
 /current_film_data.json
 /etl/test.py
+/data
+/llm_data

@@ -1,5 +1,8 @@
 import psycopg2
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class SetupPGVector:
     ''' Setup database with vector extension '''
