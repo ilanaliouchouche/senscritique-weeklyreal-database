@@ -1,29 +1,9 @@
-FROM ubuntu:latest
+FROM python:3.11.5
 
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg2 \
-    unzip \
-    build-essential \
-    zlib1g-dev \
-    libncurses5-dev \
-    libgdbm-dev \
-    libnss3-dev \
-    libssl-dev \
-    libreadline-dev \
-    libffi-dev \
-    libsqlite3-dev \
-    libbz2-dev
+RUN apt-get update && apt-get install -y wget unzip && \
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install -y ./google-chrome-stable_current_amd64.deb 
 
-RUN wget https://www.python.org/ftp/python/3.11.5/Python-3.11.5.tgz \
-    && tar -xf Python-3.11.5.tgz \
-    && cd Python-3.11.5 \
-    && ./configure --enable-optimizations \
-    && make -j 4 \
-    && make altinstall
-
-RUN ln -s /usr/local/bin/python3.11 /usr/local/bin/python \
-    && ln -s /usr/local/bin/pip3.11 /usr/local/bin/pip
 
 COPY etl /bddr-sc/etl
 COPY .env /bddr-sc/.env
@@ -31,14 +11,15 @@ COPY main.py /bddr-sc/main.py
 COPY setup_vcb.py /bddr-sc/setup_vcb.py
 COPY requirements.txt /tmp/requirements.txt
 
-RUN pip install -r /tmp/requirements.txt
+RUN pip install --trusted-host pypi.pyton.org -r /tmp/requirements.txt
 
 ENV PYTHONPATH "${PYTHONPATH}:/bddr-sc"
 
 WORKDIR /bddr-sc
 
+CMD tail -f /dev/null
 
-CMD ["python", "main.py"]
+
 
 
 

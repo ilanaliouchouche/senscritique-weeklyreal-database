@@ -8,6 +8,8 @@ import time
 import json
 from dotenv import load_dotenv
 import os
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 class BaseFilmExtractor:
@@ -265,9 +267,10 @@ class CurrentMovieExtractor(BaseFilmExtractor):
     def extract_reviews(cls, url, is_negative=True):
         ''' Extract all film reviews from a given url '''
         chrome_options = Options()
+        chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--headless=new")
-        driver = webdriver.Remote(f"http://{os.getenv('SEL_HOSTNAME')}:{os.getenv('SEL_HPORT')}/wd/hub", options=chrome_options)
-
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         review_url = f"{url}/critiques"
 
         driver.get(review_url)
