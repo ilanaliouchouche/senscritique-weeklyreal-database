@@ -2,7 +2,7 @@ from etl.extract import BaseFilmExtractor
 import pandas as pd
 import re
 from datetime import datetime
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import requests
 from copy import deepcopy
 from dotenv import load_dotenv

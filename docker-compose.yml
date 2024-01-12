@@ -5,7 +5,6 @@ services:
     depends_on:
       - pgvdb
       - tei
-      - selenium
     networks:
       - default
 

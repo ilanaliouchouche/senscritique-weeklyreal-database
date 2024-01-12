@@ -72,7 +72,6 @@ def main():
     if not first_load:
         last_week = int(os.getenv("CURRENT_WEEK")) 
     os.environ["CURRENT_WEEK"] = str(current_week)
-    update_env_file("CURRENT_WEEK", str(current_week))
     
     try:
         extractor = CurrentMovieExtractor()
@@ -106,6 +105,7 @@ def main():
         else:
             remove_current_week()
         print("Error during loading : ", e)
+    update_env_file("CURRENT_WEEK", str(current_week))
     print("--------------------[DONE]--------------------")
     
 if __name__ == "__main__":

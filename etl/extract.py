@@ -1,15 +1,15 @@
 import requests
 from bs4 import BeautifulSoup
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options 
 import time
 import json
 from dotenv import load_dotenv
 import os
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 class BaseFilmExtractor:
@@ -266,18 +266,30 @@ class CurrentMovieExtractor(BaseFilmExtractor):
     @classmethod
     def extract_reviews(cls, url, is_negative=True):
         ''' Extract all film reviews from a given url '''
-        chrome_options = Options()
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        options = Options()
+        options.headless = True
+        options.add_argument("--headless")
+        driver = webdriver.Firefox(options=options, service=Service(GeckoDriverManager().install()))
         review_url = f"{url}/critiques"
 
         driver.get(review_url)
+        time.sleep(2)
+        
+        try:
+            review_type = 'Négatives' if is_negative else 'Positives'
+            link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")
+            link_reviews.click()
+        except:
+            time.sleep(2)
+            cookie_button = driver.find_element(By.ID, "didomi-notice-agree-button")
+            cookie_button.click()
+            time.sleep(3)
+            review_type = 'Négatives' if is_negative else 'Positives'
+            link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")
+            link_reviews.click()
 
-        review_type = 'Négatives' if is_negative else 'Positives'
-        link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")
-        link_reviews.click()
+                
+
         time.sleep(2)
         
         all_links = []
@@ -287,7 +299,7 @@ class CurrentMovieExtractor(BaseFilmExtractor):
         elements = driver.find_elements(By.XPATH, "//a[contains(@class, 'sc-e6f263fc-0') and contains(@class, 'sc-a0949da7-0') and contains(@class, 'iZcnfH') and contains(@class, 'cYbaKn') and contains(@class, 'link')]")
         links = [element.get_attribute('href') for element in elements]
         all_links.extend(links)
-
+        
         return all_links
 
 
