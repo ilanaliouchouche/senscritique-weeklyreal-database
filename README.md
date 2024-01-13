@@ -23,6 +23,7 @@ The SensCritique WeekReal Database project is an advanced ETL (Extract, Transfor
 - **Scheduled and On-Demand Execution**: The process can be executed at any time, with checks to prevent reprocessing of current week's data.
 
 ## Important Note
+:rotating_light::rotating_light::rotating_light:
 - **Code Maintenance**: The code might not always be up-to-date due to possible changes in SensCritique.com's website structure. While re-adaptation of the code is straightforward, regular updates may not be feasible.
 
 ## Technology Stack
