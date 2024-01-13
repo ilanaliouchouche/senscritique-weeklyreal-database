@@ -1,4 +1,4 @@
-# SensCritique WeekReal Database
+# SensCritique WeekReal Database 🎬
 <p align="center">
   <img src="res/sc.jpg" width="200">
 </p>
@@ -60,3 +60,4 @@ without volumes, execute `setup_vcb.py` first.
 **HANDBOOK available [here](https://github.com/ilanaliouchouche/senscritique-weeklyreal-database/tree/main/handbook/README.md)**
 ## Reporting and Visualization
 Leverage the power of PowerBI to connect to the PGVector database and create insightful dashboards and reports based on the weekly cinema release data.
+# 🎬
