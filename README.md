@@ -27,10 +27,7 @@ The SensCritique WeekReal Database project is an advanced ETL (Extract, Transfor
 - **Code Maintenance**: The code might not always be up-to-date due to possible changes in SensCritique.com's website structure. While re-adaptation of the code is straightforward, regular updates may not be feasible.
 
 ## Technology Stack
-<img src="res/hf.png" width="50">
-<img src="res/pg.png" width="50">
-<img src="res/dock.jpg" width="50">
-<img src="res/sel.png" width="50">
+<img src="res/hf.png" width="50"> <img src="res/pg.png" width="50"><img src="res/dock.jpg" width="50"><img src="res/sel.png" width="50">
 
 
 - **Text Embedding Inference (TEI)**: For processing and embedding review texts.
