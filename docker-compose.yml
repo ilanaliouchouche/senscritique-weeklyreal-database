@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   app:
-    build: .
+    image: ghcr.io/ilanaliouchouche/bddr-sc:latest
     depends_on:
       - pgvdb
       - tei

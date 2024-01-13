@@ -3,12 +3,12 @@ from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options 
+from selenium.webdriver.chrome.options import Options 
 import time
 import json
 from dotenv import load_dotenv
 import os
-from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
@@ -227,7 +227,6 @@ class BaseFilmExtractor:
             all_details[title]['rate'] = self.extract_film_rating(url)
             all_details[title]['image'] = self.extract_image(url)
             all_details[title]['reviews'] = {'Positives' : self.extract_reviews(url, is_negative=False), 'Negatives' : self.extract_reviews(url, is_negative=True)}
-        print(all_details)
         print("Done with all films, extracting reviews...")
         for title, details in tqdm(all_details.items()):
             for review_type, review_links in details['reviews'].items():
@@ -269,7 +268,7 @@ class CurrentMovieExtractor(BaseFilmExtractor):
         options = Options()
         options.headless = True
         options.add_argument("--headless")
-        driver = webdriver.Firefox(options=options, service=Service(GeckoDriverManager().install()))
+        driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
         review_url = f"{url}/critiques"
 
         driver.get(review_url)
@@ -281,12 +280,25 @@ class CurrentMovieExtractor(BaseFilmExtractor):
             link_reviews.click()
         except:
             time.sleep(2)
+            '''
             cookie_button = driver.find_element(By.ID, "didomi-notice-agree-button")
             cookie_button.click()
             time.sleep(3)
             review_type = 'Négatives' if is_negative else 'Positives'
             link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")
             link_reviews.click()
+            '''
+            tries = 0
+            while tries < 5:
+                try:
+                    review_type = 'Négatives' if is_negative else 'Positives'
+                    link_reviews = driver.find_element(By.XPATH, f"//a[contains(text(), '{review_type}')]")
+                    link_reviews.click()
+                    break
+                except:
+                    time.sleep(2)
+                    tries += 1
+                    pass
 
                 
 
