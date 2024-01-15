@@ -13,10 +13,10 @@
 - [Reporting and visualization](#reporting-and-visualization)
 
 ## Overview
-The SensCritique WeekReal Database project is an advanced ETL (Extract, Transform, Load) application developed in Python. It focuses on gathering weekly cinema release data from [https://www.senscritique.com](https://www.senscritique.com/). The project's primary aim is to extract movie data, transform it, and then store it in a [PGVector](https://github.com/pgvector/pgvector) database, a specialized vector data structure. This choice is motivated by the need to process and embed movie reviews, categorizing them into positive or negative sentiments, which is pivotal for subsequent data analysis and visualization.
+The SensCritique WeekReal Database project is an advanced ETL (Extract, Transform, Load) application developed in Python. It focuses on gathering weekly cinema release data from [sens-critique](https://www.senscritique.com/). The project's primary aim is to extract movie data, transform it, and then store it in a [PGVector](https://github.com/pgvector/pgvector) database, a specialized vector data structure. This choice is motivated by the need to process and embed movie reviews, categorizing them into positive or negative sentiments, which is pivotal for subsequent data analysis and visualization.
 
 ## Key Features
-- **Automated ETL Pipeline**: Extracts data from sens-critique https://www.senscritique.com/, transforms it, and loads it into a PGVector database.
+- **Automated ETL Pipeline**: Extracts data from [sens-critique](https://www.senscritique.com/), transforms it, and loads it into a PGVector database.
 - **Review Analysis**: Captures and categorizes movie reviews, enabling detailed sentiment analysis.
 - **Vector Database Utilization**: Leverages [PGVector]((https://github.com/pgvector/pgvector)) for efficient handling and querying of vector data.
 - **Dashboard Compatibility**: Designed to support data visualization and dashboard creation in PowerBI.
