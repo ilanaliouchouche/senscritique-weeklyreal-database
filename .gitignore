@@ -7,4 +7,6 @@
 /llm_data
 **/__pycache__/
 data2/
-
+.conda/
+/bddr_sc.egg-info
+/setup.py
