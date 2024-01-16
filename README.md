@@ -43,7 +43,6 @@ The SensCritique WeekReal Database project is an advanced ETL (Extract, Transfor
 | `Dockerfile`          | Dockerfile for creating the application's image.     |
 | `main.py`             | Script to execute the ETL process.                   |
 | `setup_vcb.py`        | Script for initial database setup (if running without volumes). |
-| `setup.py`        | Script for initial setup. |
 | `bddr-sc-env.yml`        | Script for setup the conda env. |
 
 ## Usage
