@@ -1,4 +1,4 @@
-# Project Usage Guide
+# Project Usage Guide 👨‍💻
 
 This guide provides step-by-step instructions on how to set up and use the project using Conda and by cloning the repository.
 
@@ -10,6 +10,7 @@ This guide provides step-by-step instructions on how to set up and use the proje
 ### Prerequisites
 - Conda environment manager
 - Git
+- Docker
 
 ### 1. Clone the Repository
 First, clone the repository to your local machine using Git:
@@ -19,16 +20,21 @@ git clone https://github.com/ilanaliouchouche/senscritique-weeklyreal-database
 ### 2. Create a Conda Environement 
 After cloning the repository, create a new Conda environment using the provided YAML file:
 ```bash
-conda env create -f bddr-sc-env.yml
+conda env create -f bddr-sc-env.yml -n bddr-sc-env
 ```
 ### 3. Activate the Environment
 Once the environment is successfully created, activate it:
 ```bash
 conda activate bddr-sc-env
 ```
+### 2 & 3 bis. Install requirements
+Alternatively, you can use directly [/requirements.txt](/requirements.txt)
+```bash
+pip install -r requirements.txt
+```
 ### 4. Launch Containers
 Launch two containers:
- - One for the TEI (Text Encoding Initiative)
+ - One for the TEI (Text Encoding Inference)
  - Another for PGVector
 **Note**: Specific commands for launching these containers will depend on your containerization tool and the configurations required for TEI and PGVector.
 Example:
