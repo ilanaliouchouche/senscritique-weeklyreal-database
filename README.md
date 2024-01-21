@@ -51,7 +51,7 @@ without volumes, execute `setup_vcb.py` first.
 - **Conda Environment**: Setup a Conda environment and execute `main.py`, or use the classes within a Notebook. **In this case, setup the rights ENV VAR**  
 **Note**: Don't forget to launch pgvector and TEI images.  
 
-- **Reporting**: For reporting purposes, retrieve only the volume `data/`, launch a PGVector instance, and connect to the database from PowerBI.
+- **Reporting**: For reporting purposes, retrieve only the volume `data/`, launch a PGVector instance, and connect to the database from PowerBI. You can use the volume that I provide here. You just need to unzip [data.zip](https://github.com/ilanaliouchouche/senscritique-weeklyreal-database/blob/main/data.zip).
   
 **HANDBOOK available [here](https://github.com/ilanaliouchouche/senscritique-weeklyreal-database/tree/main/handbook/README.md)**
 ## Reporting and Visualization
