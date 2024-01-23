@@ -15,6 +15,10 @@
 ## Overview
 The SensCritique WeeklyReal Database project is an advanced ETL (Extract, Transform, Load) application developed in Python. It focuses on gathering weekly cinema release data from [sens-critique](https://www.senscritique.com/). For the transformation phase, we will leverage a Large Language Model (LLM) and the [TEI](https://github.com/huggingface/text-embeddings-inference) project to vectorize the reviews. The project's primary aim is to extract movie data, transform it using these advanced tools, and then store it in a [PGVector](https://github.com/pgvector/pgvector) database, a specialized vector data structure. This choice is motivated by the need to process and embed movie reviews, categorizing them into positive or negative sentiments, which is pivotal for subsequent data analysis and visualization.
 
+<p align="left">
+  <img src="res/Pipeline.png" width="600">
+</p>
+
 ## Key Features
 - **Automated ETL Pipeline**: Extracts data from [sens-critique](https://www.senscritique.com/), transforms it, and loads it into a PGVector database.
 - **Review Analysis**: Captures and categorizes movie reviews, enabling detailed sentiment analysis.
