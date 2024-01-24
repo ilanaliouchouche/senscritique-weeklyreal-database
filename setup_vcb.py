@@ -7,7 +7,7 @@ load_dotenv()
 class SetupPGVector:
     ''' Setup database with vector extension '''
 
-    def __init__(self, dbname, user, password, host, port):
+    def __init__(self, dbname : str, user : str, password : str, host : str, port : str):
         ''' Constructor for SetupPGVector:
             - dbname : database name
             - user : user name

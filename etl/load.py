@@ -1,10 +1,11 @@
+import pandas as pd
 from etl.transform import FilmTransformer
 import psycopg2
 
 class FilmLoader:
     ''' Load data into database '''
 
-    def __init__(self, data : FilmTransformer, dbname : str, user : str, password : str, host : str, port : int):
+    def __init__(self, data : FilmTransformer, dbname : str, user : str, password : str, host : str, port : int) -> None:
         ''' FilmLoader constructor:
             - data : FilmTransformer object
             - dbname : database name
@@ -26,7 +27,7 @@ class FilmLoader:
             raise Exception("Connection failed")
         print("Connected to database")
     
-    def __load(self, df, table_name):
+    def __load(self, df : pd.DataFrame, table_name : str) -> None:
         ''' Load data from a dataframe into database:
             - df : dataframe
             - table_name : table name '''
@@ -54,7 +55,7 @@ class FilmLoader:
                 query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
                 cursor.execute(query, values)
     
-    def loading(self):
+    def loading(self) -> None:
         ''' Load all data into database '''
         print("Loading data...")
         self.__load(self.data.df_films, 'films')

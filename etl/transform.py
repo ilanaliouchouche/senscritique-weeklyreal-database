@@ -12,14 +12,14 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)),
 class FilmTransformer:
     ''' Transform data from extractor to multiple dataframes '''
 
-    def __init__(self, extractor : BaseFilmExtractor):
+    def __init__(self, extractor : BaseFilmExtractor) -> None:
         ''' FilmTransformer constructor:
             - extractor : BaseFilmExtractor object '''
         self.extractor = extractor
         self.df_films, self.df_genres, self.df_producteurs, self.df_realisateurs, self.df_scenaristes, self.df_pays, self.df_reviews = self.__transform()
     
     @staticmethod
-    def get_embeddings(reviews):
+    def get_embeddings(reviews : list[str]) -> list[list[float]]:
         ''' Get embeddings from TEI API:
             - reviews : list of reviews '''
         embeddings = []
@@ -40,7 +40,7 @@ class FilmTransformer:
         return embeddings
 
     
-    def __transform(self):
+    def __transform(self) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         ''' Transform data from extractor to multiple dataframes '''
         informations = deepcopy(self.extractor.informations)
         films_cols  = ['url', 'rate', 'Date de sortie (France)', 'image', 'Bande originale', 'Groupe', 'Année', 'Durée']

@@ -10,7 +10,7 @@ load_dotenv()
 
 ''' Main script to extract, transform and load data into database '''
 
-def get_current_week():
+def get_current_week() -> int:
     ''' Get current week number '''
     current_date = datetime.datetime.now()
     current_week = current_date.isocalendar()[1]
@@ -23,7 +23,7 @@ def get_current_week():
 
     return current_week
 
-def remove_current_week():
+def remove_current_week() -> None:
     ''' Remove current week from .env file '''
     env_file = '.env'
 
@@ -38,7 +38,7 @@ def remove_current_week():
     with open(env_file, 'w') as file:
         file.writelines(lines)
 
-def update_env_file(key, value):
+def update_env_file(key : str, value : str) -> None:
     ''' Update .env file '''
     env_file = '.env'
 
@@ -58,7 +58,7 @@ def update_env_file(key, value):
     with open(env_file, 'w') as file:
         file.writelines(lines)
 
-def main():
+def main() -> None:
     ''' Main function '''
     current_week = get_current_week()
     first_load = False

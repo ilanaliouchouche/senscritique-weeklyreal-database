@@ -1,9 +1,11 @@
+from typing import List
 import requests
 from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options 
+from selenium.webdriver.chrome.webdriver import WebDriver
 import time
 import json
 from dotenv import load_dotenv
@@ -17,7 +19,7 @@ class BaseFilmExtractor:
     
     URL = "https://www.senscritique.com/films/sorties-cinema/"
 
-    def __init__(self, year, url=URL):
+    def __init__(self, year : int, url : str = URL) -> None:
         ''' Constructor for BaseFilmExtractor :
             - year : year of the films
             - url : url of the page to extract films from (default : https://www.senscritique.com/films/sorties-cinema/)) '''
@@ -26,13 +28,13 @@ class BaseFilmExtractor:
         self.informations = None
     
     @staticmethod
-    def extract_film_links_from_page(driver):
+    def extract_film_links_from_page(driver : WebDriver) -> List[str]:
         ''' Extract all film links from a given page '''
         elements = driver.find_elements(By.CLASS_NAME, "Poster__SubLink-sc-yale2-2.jhmgpI")
         return [element.get_attribute('href') for element in elements]
 
     @staticmethod
-    def calculate_total_pages(url):
+    def calculate_total_pages(url : str) -> int:
         ''' Calculate the total number of pages for a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -45,7 +47,7 @@ class BaseFilmExtractor:
         else:
             return 1 
 
-    def extract_all_film_links(self, cpt = 4):
+    def extract_all_film_links(self, cpt = 4) -> None:
         ''' Extract all film links from a given url '''
         print("Extracting all films links...")
         if cpt == 0:
@@ -84,7 +86,7 @@ class BaseFilmExtractor:
         print("Done with all films links")
     
     @staticmethod
-    def extract_film_details(detail_url):
+    def extract_film_details(detail_url : str) -> dict[str, str]:
         ''' Extract all film details from a given url '''
         response = requests.get(detail_url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -99,7 +101,7 @@ class BaseFilmExtractor:
         return infos_dict
 
     @staticmethod
-    def extract_film_title(detail_url):
+    def extract_film_title(detail_url : str) -> str:
         ''' Extract film title from a given url '''
         response = requests.get(detail_url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -111,7 +113,7 @@ class BaseFilmExtractor:
         raise Exception("Title not found")
     
     @staticmethod
-    def extract_film_rating(url):
+    def extract_film_rating(url : str) -> float:
         ''' Extract film rating from a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -122,7 +124,7 @@ class BaseFilmExtractor:
         return None
     
     @staticmethod
-    def extract_image(url):
+    def extract_image(url : str) -> str:
         ''' Extract film image from a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -135,7 +137,7 @@ class BaseFilmExtractor:
         return None
 
     @classmethod
-    def extract_reviews(cls, url, is_negative=True, cpt = 100):
+    def extract_reviews(cls, url : str, is_negative : bool = True, cpt : int = 100) -> List[str]:
         ''' Extract all film reviews from a given url '''
         if cpt == 0:
             raise Exception("Too many attempts")
@@ -186,7 +188,7 @@ class BaseFilmExtractor:
         return all_links
     
     @staticmethod
-    def extract_review_details(url):
+    def extract_review_details(url : str) -> dict[str, str]:
         ''' Extract review details from a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -214,7 +216,7 @@ class BaseFilmExtractor:
         }
         
     
-    def extract_all_film_data(self):
+    def extract_all_film_data(self) -> None:
         ''' Extract all film data from a given url using all the methods above'''
         all_details = {}
         print("Extracting all films informations...")
@@ -244,13 +246,13 @@ class CurrentMovieExtractor(BaseFilmExtractor):
     ''' Class to extract films informations from senscritique.com in the current week. '''
     URL  = "https://www.senscritique.com/films/cette-semaine"
 
-    def __init__(self, url=URL):
+    def __init__(self, url : str = URL) -> None:
         ''' Constructor for CurrentMovieExtractor :
             - url : url of the page to extract films from (default : https://www.senscritique.com/films/cette-semaine)) '''
         super().__init__(url)
         self.url = url
     
-    def extract_all_film_links(self):
+    def extract_all_film_links(self) -> None:
         ''' Extract all film links from a given url '''
         print("Extracting all films links...")
         response = requests.get(self.url)
@@ -263,7 +265,7 @@ class CurrentMovieExtractor(BaseFilmExtractor):
         print("Done with all films links")
     
     @classmethod
-    def extract_reviews(cls, url, is_negative=True):
+    def extract_reviews(cls, url : str, is_negative : bool = True) -> List[str]:
         ''' Extract all film reviews from a given url '''
         options = Options()
         options.headless = True
