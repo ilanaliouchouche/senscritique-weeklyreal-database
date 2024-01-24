@@ -47,7 +47,7 @@ class BaseFilmExtractor:
         else:
             return 1 
 
-    def extract_all_film_links(self, cpt = 4) -> None:
+    def extract_all_film_links(self, cpt : int = 4) -> None:
         ''' Extract all film links from a given url '''
         print("Extracting all films links...")
         if cpt == 0:

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from etl.extract import BaseFilmExtractor
 import pandas as pd
 import re
@@ -41,7 +41,7 @@ class FilmTransformer:
         return embeddings
 
     
-    def __transform(self) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def __transform(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         ''' Transform data from extractor to multiple dataframes '''
         informations = deepcopy(self.extractor.informations)
         films_cols  = ['url', 'rate', 'Date de sortie (France)', 'image', 'Bande originale', 'Groupe', 'Année', 'Durée']
