@@ -20,7 +20,7 @@ class FilmTransformer:
         self.df_films, self.df_genres, self.df_producteurs, self.df_realisateurs, self.df_scenaristes, self.df_pays, self.df_reviews = self.__transform()
     
     @staticmethod
-    def get_embeddings(reviews : list[str]) -> List[List[float]]:
+    def get_embeddings(reviews : List[str]) -> List[List[float]]:
         ''' Get embeddings from TEI API:
             - reviews : list of reviews '''
         embeddings = []

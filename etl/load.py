@@ -67,14 +67,14 @@ class FilmLoader:
         self.__load(self.data.df_reviews, 'reviews')
         print("Done with loading")
     
-    def __str__(self):
+    def __str__(self) -> str:
         ''' String representation of FilmLoader object '''
         return f"dbname={self.dbname} user={self.user} password={self.password} host={self.host} port={self.port}"
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         ''' Representation of FilmLoader object '''
         return self.__str__()
     
-    def __call__(self):
+    def __call__(self) -> str:
         ''' Call FilmLoader object '''
         return self.__str__()

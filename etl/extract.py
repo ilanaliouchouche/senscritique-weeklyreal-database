@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 import requests
 from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
@@ -86,7 +86,7 @@ class BaseFilmExtractor:
         print("Done with all films links")
     
     @staticmethod
-    def extract_film_details(detail_url : str) -> dict[str, str]:
+    def extract_film_details(detail_url : str) -> Dict[str, str]:
         ''' Extract all film details from a given url '''
         response = requests.get(detail_url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -188,7 +188,7 @@ class BaseFilmExtractor:
         return all_links
     
     @staticmethod
-    def extract_review_details(url : str) -> dict[str, str]:
+    def extract_review_details(url : str) -> Dict[str, str]:
         ''' Extract review details from a given url '''
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
