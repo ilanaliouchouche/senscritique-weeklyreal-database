@@ -7,7 +7,7 @@ load_dotenv()
 class SetupPGVector:
     ''' Setup database with vector extension '''
 
-    def __init__(self, dbname : str, user : str, password : str, host : str, port : str):
+    def __init__(self, dbname : str, user : str, password : str, host : str, port : str) -> None:
         ''' Constructor for SetupPGVector:
             - dbname : database name
             - user : user name
@@ -25,7 +25,7 @@ class SetupPGVector:
         except:
             raise Exception("Connection failed")
     
-    def setup_vdb(self, vector_size = 1024):
+    def setup_vdb(self, vector_size = 1024) -> None:
         ''' Setup database with vector extension '''
         with self.conx.cursor() as cursor:
             cursor.execute(f"CREATE EXTENSION IF NOT EXISTS vector")
@@ -45,15 +45,15 @@ class SetupPGVector:
             cursor.execute(f"CREATE TABLE reviews (id SERIAL PRIMARY KEY, film VARCHAR(255), is_negative BOOLEAN, title VARCHAR(255), likes FLOAT, comments FLOAT, content TEXT, url VARCHAR(255), embedding vector({vector_size}))")
         
     
-    def __str__(self):
+    def __str__(self) -> str:
         ''' String representation of SetupPGVector '''
         return f"dbname={self.dbname} user={self.user} password={self.password} host={self.host} port={self.port}"
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         ''' Representation of SetupPGVector '''
         return self.__str__()
     
-    def __call__(self):
+    def __call__(self) -> str:
         ''' Call SetupPGVector '''
         return self.__str__()  
 
