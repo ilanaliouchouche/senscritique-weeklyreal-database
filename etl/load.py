@@ -5,7 +5,7 @@ import psycopg2
 class FilmLoader:
     ''' Load data into database '''
 
-    def __init__(self, data : FilmTransformer, dbname : str, user : str, password : str, host : str, port : int) -> None:
+    def __init__(self, data : FilmTransformer, dbname : str, user : str, password : str, host : str, port : str) -> None:
         ''' FilmLoader constructor:
             - data : FilmTransformer object
             - dbname : database name
